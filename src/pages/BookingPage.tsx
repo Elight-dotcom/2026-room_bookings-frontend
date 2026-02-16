@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getBookings } from "../api/bookingApi";
+import { getBookings, searchBookings } from "../api/bookingApi";
+import { getRooms, type Room } from "../api/roomApi";
 
 interface Booking {
     id: number;
@@ -21,14 +22,20 @@ interface Booking {
 
 function BookingPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [rooms, setRooms] = useState<Room[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [selectedRoomId, setSelectedRoomId] = useState<string>("");
+    const [selectedDate, setSelectedDate] = useState<string>("");
 
     useEffect(() => {
         const loadData = async () => {
             try {
                 setLoading(true);
                 const data = await getBookings();
+                const roomData = await getRooms();
+                setRooms(roomData);
                 setBookings(data);
             } catch (error) {
                 console.error("Error fetching booking data:", error);
@@ -40,6 +47,29 @@ function BookingPage() {
 
         loadData();
     }, []);
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (loading) return;
+
+        try {
+            setLoading(true);
+
+            const searchResult = await searchBookings({
+                query: searchQuery, 
+                roomId: selectedRoomId ? Number(selectedRoomId) : undefined, 
+                bookingDate: selectedDate || undefined
+            });
+
+            setBookings(searchResult);
+            setError(null);
+        } catch (error) {
+            console.log(error);
+            setError("Gagal memuat booking...");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen px-6 mt-20">
@@ -53,12 +83,25 @@ function BookingPage() {
             {/* Add Booking Button */}
             <div className="w-full flex items-center justify-between mx-auto mt-7">
                 {/* Search */}
-                <form className="flex items-center">
+                <form onSubmit={handleSearch} className="flex items-center">
                     <input
+                        name="userName"
                         type="text"
                         placeholder="Search by name"
                         className="px-4 py-2 border border-gray-300 rounded-l-md"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
+
+                    <select name="roomId" onChange={(e) => setSelectedRoomId(e.target.value)} className="px-4 py-2 border border-gray-300">
+                        <option value="">All</option>
+                        {rooms.map((room) => (
+                            <option key={room.id} value={room.id}>{room.name}</option>
+                        ))}
+                    </select>
+
+                    <input type="date" name="bookingDate" onChange={(e) => setSelectedDate(e.target.value)} className="px-4 py-2 border border-gray-300"/>
+
                     <button
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded-r-md"
@@ -151,9 +194,15 @@ function BookingPage() {
                                             <Link to={`/bookings/${booking.id}`} className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition">
                                                 Detail
                                             </Link>
-                                            <Link to={`/bookings/edit/${booking.id}`} className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-                                                Edit
-                                            </Link>
+                                            {booking.statusId === 1? (
+                                                <Link to={`/bookings/edit/${booking.id}`} className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                                                    Edit
+                                                </Link>
+                                            ) : (
+                                                <button className="px-3 py-1.5 text-sm bg-blue-200 text-white rounded-md hover:bg-blue-300 transition cursor-not-allowed">
+                                                    Edit
+                                                </button>
+                                            )}
                                             <button className="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition">
                                                 Delete
                                             </button>

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { addBooking, getBookingById, updateBooking } from "../api/bookingApi";
@@ -128,7 +129,15 @@ const AddBookingPage = () => {
                 });
             }
         } catch (err) {
-            setError(isEditing ? "Failed to update booking." : "Failed to create booking.");
+            if (axios.isAxiosError(err) && err.response) {
+                setError(
+                    err.response?.data?.message || 
+                    err.response?.data || 
+                    "An error occurred while processing your request."
+                );
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+            }
             console.error(err);
         } finally {
             setLoading(false);
@@ -402,7 +411,7 @@ const AddBookingPage = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-700 hover:to-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center shadow-lg shadow-blue-500/30"
+                                className="px-8 py-3 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center shadow-lg shadow-blue-500/30"
                             >
                                 {loading ? (
                                     <>

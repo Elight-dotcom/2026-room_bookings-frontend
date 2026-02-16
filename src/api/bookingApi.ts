@@ -54,3 +54,16 @@ export const updateBooking = async (id: number, bookingData: Partial<Omit<Bookin
 export const deleteBooking = async (id: number): Promise<void> => {
     await axios.delete(`${API_URL}/${id}`);
 };
+
+// Search bookings by name, room or date
+export const searchBookings = async (params: {
+        query?: string;
+        roomId?: number;
+        bookingDate?: string;
+    }) => {
+    const response = await axios.get(`${API_URL}/search`, {
+        params,
+    });
+
+    return response.data;
+};
