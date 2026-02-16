@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import NavBar from "./components/Navbar";
 import AddBookingPage from "./pages/AddBookingPage";
 import BookingPage from "./pages/BookingPage";
+import DetailBookingPage from "./pages/DetailBookingPage";
 import Home from "./pages/Home";
 import UserPage from "./pages/UserPage";
 
@@ -49,7 +50,13 @@ function App() {
               <AddBookingPage />
             }
           />
-          {/*  */}
+          {/* Detail Booking */}
+          <Route
+            path="/bookings/detail/:id" 
+            element={
+              <DetailBookingPage />
+            }
+          />
         </Routes>
       </main>
     </>

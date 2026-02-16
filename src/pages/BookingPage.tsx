@@ -1,24 +1,8 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getBookings, searchBookings } from "../api/bookingApi";
+import { deleteBooking, getBookings, searchBookings, type Booking } from "../api/bookingApi";
 import { getRooms, type Room } from "../api/roomApi";
-
-interface Booking {
-    id: number;
-    userId: number;
-    userName: string;
-    userNRP: string;
-    roomId: number;
-    roomName: string;
-    roomLocation: string;
-    bookingDate: string;
-    startTime: string;
-    endTime: string;
-    purpose: string;
-    statusId: number;
-    statusName: string;
-    createdAt: string;
-}
 
 function BookingPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -64,10 +48,29 @@ function BookingPage() {
             setBookings(searchResult);
             setError(null);
         } catch (error) {
-            console.log(error);
-            setError("Gagal memuat booking...");
+            if (axios.isAxiosError(error) && error.response) {
+                setError(error.response.data.message || "Gagal mencari booking...");
+            } else {
+                setError("Gagal mencari booking...");
+            }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this booking?");
+        if (!confirmDelete) return;
+
+        try {
+            await deleteBooking(id);
+            setBookings(bookings.filter((booking) => booking.id !== id));
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                setError(error.response.data.message || "Gagal menghapus booking...");
+            } else {
+                setError("Gagal menghapus booking...");
+            }
         }
     };
 
@@ -191,7 +194,7 @@ function BookingPage() {
                                         </td>
 
                                         <td className="px-6 py-4 whitespace-nowrap space-x-2">
-                                            <Link to={`/bookings/${booking.id}`} className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition">
+                                            <Link to={`/bookings/detail/${booking.id}`} className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition">
                                                 Detail
                                             </Link>
                                             {booking.statusId === 1? (
@@ -203,7 +206,7 @@ function BookingPage() {
                                                     Edit
                                                 </button>
                                             )}
-                                            <button className="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition">
+                                            <button onClick={() => handleDelete(booking.id)} className="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition cursor-pointer">
                                                 Delete
                                             </button>
                                         </td>
