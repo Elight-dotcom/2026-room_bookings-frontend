@@ -69,7 +69,7 @@ export const searchBookings = async (params: {
 };
 
 // Update booking status
-export const updateBookingStatus = async (id: number, statusId: number, statusNote?: string): Promise<Booking> => {
-    const response = await axios.put<Booking>(`${API_URL}/${id}/status`, { statusId, statusNote });
+export const updateBookingStatus = async (id: number, statusId: number, note?: string): Promise<Booking> => {
+    const response = await axios.put<Booking>(`${API_URL}/${id}/status`, { statusId, note });
     return response.data;
 }
