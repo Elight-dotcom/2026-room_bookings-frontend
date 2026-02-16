@@ -55,11 +55,8 @@ function UserPage() {
         {/* Header */}
         <div className="text-center w-full mx-auto mt-24">
             <h1 className="text-4xl font-bold text-blue-600">
-                Room Bookings
+                User
             </h1>
-            <p className="text-lg text-blue-500 mt-2">
-                Manage your room bookings with ease and efficiency.
-            </p>
         </div>
 
         {/* Search */}
@@ -90,13 +87,13 @@ function UserPage() {
 
         {/* Loading */}
         {loading && (
-            <div className="text-center text-xl font-bold text-blue-600 mt-6">
-                Loading...
+            <div className="flex justify-center items-center mt-6">
+                <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         )}
 
         {/* User Table */}
-        {!loading && (
+        {!loading && !error && (
         <div className="mt-12 bg-white shadow-lg rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -137,7 +134,7 @@ function UserPage() {
                     users.map((user) => (
                     <tr
                         key={user.id}
-                        className="hover:bg-gray-50 transition"
+                        className="border-t"
                     >
                         <td className="px-6 py-4 text-sm text-gray-900">
                         {user.id}
