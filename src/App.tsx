@@ -4,6 +4,7 @@ import AddBookingPage from "./pages/AddBookingPage";
 import BookingPage from "./pages/BookingPage";
 import DetailBookingPage from "./pages/DetailBookingPage";
 import Home from "./pages/Home";
+import StatusHistoryPage from "./pages/StatusHistoryPage";
 import UserPage from "./pages/UserPage";
 
 function App() {
@@ -55,6 +56,13 @@ function App() {
             path="/bookings/detail/:id" 
             element={
               <DetailBookingPage />
+            }
+          />
+          {/* History Status */}
+          <Route
+            path="/history" 
+            element={
+              <StatusHistoryPage />
             }
           />
         </Routes>

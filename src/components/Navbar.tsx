@@ -13,6 +13,7 @@ export default function NavBar() {
                     <Link to="/" className="navbar-item hover:text-gray-300 transition ease-in-out duration-300 cursor-pointer">Home</Link>
                     <Link to="/users" className="navbar-item hover:text-gray-300 transition ease-in-out duration-300 cursor-pointer">User</Link>
                     <Link to="/bookings" className="navbar-item hover:text-gray-300 transition ease-in-out duration-300 cursor-pointer">Bookings</Link>
+                    <Link to="/history" className="navbar-item hover:text-gray-300 transition ease-in-out duration-300 cursor-pointer">History</Link>
                 </div>
                 <div>
 

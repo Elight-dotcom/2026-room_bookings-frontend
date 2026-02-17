@@ -1,9 +1,9 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
-import { getUser, searchUsers, type User } from "../api/userApi";
+import { getStatusHistory, type StatusHistory } from "../api/statusHistoryApi";
 
-function UserPage() {
-    const [searchQuery, setSearchQuery] = useState < string > ("");
-    const [users, setUsers] = useState < User[] > ([]);
+function StatusHistoryPage() {
+    const [statusHistory, setStatusHistory] = useState < StatusHistory[] > ([]);
     const [error, setError] = useState < string | null > (null);
     const [loading, setLoading] = useState < boolean > (false);
 
@@ -11,11 +11,15 @@ function UserPage() {
         const loadData = async () => {
             try {
                 setLoading(true);
-                const data = await getUser();
-                setUsers(data);
+                const data = await getStatusHistory();
+                setStatusHistory(data);
             } catch (error) {
-                console.error("Error fetching user data:", error);
-                setError("Gagal memuat pengguna...");
+                if(axios.isAxiosError(error)) {
+                    console.error("Axios error:", error.response?.data || error.message);
+                } else {
+                    console.error("Error fetching status history data:", error);
+                    setError("Gagal memuat status history...");
+                }
             } finally {
                 setLoading(false);
             }
@@ -24,49 +28,13 @@ function UserPage() {
         loadData();
     }, []);
 
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (loading) return;
-
-        try {
-            setLoading(true);
-        const searchResult = await searchUsers(searchQuery);
-            setUsers(searchResult);
-            setError(null);
-        } catch (error) {
-            console.log(error);
-            setError("Gagal memuat pengguna...");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <div className="min-h-screen px-6">
         {/* Header */}
         <div className="text-center w-full mx-auto mt-24">
             <h1 className="text-4xl font-bold text-blue-600">
-                User
+                Status History
             </h1>
-        </div>
-
-        {/* Search */}
-        <div className="flex justify-center mt-10">
-            <form onSubmit={handleSearch} className="flex">
-                <input
-                    type="text"
-                    placeholder="Search User..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                />
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white rounded-r-lg px-4 py-2 hover:bg-blue-600 transition duration-300"
-                >
-                    Search
-                </button>
-            </form>
         </div>
 
         {/* Error */}
@@ -83,74 +51,76 @@ function UserPage() {
             </div>
         )}
 
-        {/* User Table */}
+        {/* Status History Table */}
         {!loading && !error && (
         <div className="mt-12 bg-white shadow-lg rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                 <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    Role
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Booking ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    Name
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    NRP
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Changed To
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    Email
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Note
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    Created At
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Changed At
                     </th>
                 </tr>
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                {users.length === 0 ? (
+                {statusHistory.length === 0 ? (
                     <tr>
                     <td
                         colSpan={6}
                         className="px-6 py-6 text-center text-gray-500"
                     >
-                        No users found.
+                        No status history found.
                     </td>
                     </tr>
                 ) : (
-                    users.map((user) => (
+                    statusHistory.map((history) => (
                     <tr
-                        key={user.id}
+                        key={history.id}
                         className="border-t"
                     >
                         <td className="px-6 py-4 text-sm text-gray-900">
-                        {user.id}
+                        {history.id}
                         </td>
 
                         <td className="px-6 py-4 text-sm">
                         <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600 font-medium">
-                            {user.role}
+                            {history.bookingId}
                         </span>
                         </td>
 
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {user.name}
+                        {history.changedByUserName}
                         </td>
 
                         <td className="px-6 py-4 text-sm text-gray-500">
-                        {user.nrp}
+                            <span className={`px-2 py-1 text-xs rounded-full text-white ${history.statusId === 1 ? "bg-yellow-500" : history.statusId === 2 ? "bg-green-500" : history.statusId === 3 ? "bg-red-500" : "bg-gray-500"} font-medium`}>
+                                {history.statusId === 1 ? "Pending" : history.statusId === 2 ? "Approved" : history.statusId === 3 ? "Rejected" : "Cancelled"}
+                            </span>
                         </td>
 
                         <td className="px-6 py-4 text-sm text-gray-500">
-                        {user.email}
+                        {history.note == "" || history.note == null ? "-" : history.note}
                         </td>
 
                         <td className="px-6 py-4 text-sm text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        {new Date(history.changedAt).toLocaleDateString()}
                         </td>
                     </tr>
                     ))
@@ -165,4 +135,4 @@ function UserPage() {
     );
 }
 
-export default UserPage;
+export default StatusHistoryPage;
